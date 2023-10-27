@@ -1,0 +1,4 @@
+Keying Valuing
+Mango 6.50
+Orange 3.30
+Apple 4.20
