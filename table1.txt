@@ -1,4 +1,4 @@
-Keying Valuing
+Key Value
 Mango 6.50
-Orange 3.30
-Apple 4.20
+Orange 12.00
+Apple 5.90

@@ -14,59 +14,18 @@ int startProgram = TRUE;
 // Allocate Memory
 Record *recordPairs = NULL;
 int pairCount = 0;
-int editing = FALSE;
 
-int editDataTable(char dataTable[])
-{
-    editing = TRUE;
-    char operation[50], key[50];
-    float value;
-
-    if (recordPairs == NULL)
-    {
-        printf("Failed to write empty memory.\n");
-        return -1;
-    }
-
-    FILE *file = fopen(dataTable, "w");
-
-    if (file == NULL)
-    {
-        perror("Failed to open the file for writing");
-        fclose(file);
-        return -1;
-    }
-    else
-    {
-        while (editing == TRUE)
-        {
-            printf("Enter a command:\n");
-            fgets(operation, sizeof(operation), stdin);
-            operation[strlen(operation) - 1] = '\0';
-
-            if (sscanf(operation, "UPDATE %s %f", key, &value) == 2)
-            {
-                for (int i = 0; i < pairCount; i++)
-                {
-                    if (strcmp(key, recordPairs[i].key) == 0){
-                        recordPairs[i].value = value;
-                        printf("The value for the record of Key=%s, Value=%f is successfully updated.\n", recordPairs[i].key, recordPairs[i].value);
-                        break;
-                    }
-                }
-            } else {
-                if(strcmp(operation, "quit") == 0){
-                    editing = FALSE;
-                }
-            }
-        }
-        fclose(file);
-    }
-    return 0;
-}
+int dataTableOpen = FALSE;
 
 int saveDataTable(char dataTable[])
 {
+    // Check if datatable is open
+    if (!dataTableOpen)
+    {
+        printf("No data table is open. Use the 'open' command to open a data table.\n");
+        return -1;
+    }
+
     //check for empty memory
     if (recordPairs == NULL)
     {
@@ -86,7 +45,7 @@ int saveDataTable(char dataTable[])
     {
 
         // Write the data to the file
-        fprintf(file, "%s %s\n", "Keying", "Valuing");
+        fprintf(file, "%s %s\n", "Key", "Value");
         for (int i = 0; i < pairCount; i++)
         {
             fprintf(file, "%s %.2f\n", recordPairs[i].key, recordPairs[i].value);
@@ -122,7 +81,7 @@ int openDataTable(char dataTable[])
             fclose(file);
             return -1;
         }
-
+        printf("Selected DataTable: %s\n", dataTable);
         while (fgets(line, sizeof(line), file) != NULL)
         {
             // Resize the array to accommodate a new record
@@ -148,42 +107,105 @@ int openDataTable(char dataTable[])
     }
 }
 
+int updateDataTable(char key[], float newValue)
+{
+    int found = FALSE;
+
+    for (int i = 0; i < pairCount; i++)
+    {
+        if (strcasecmp(recordPairs[i].key, key) == 0)
+        {
+            recordPairs[i].value = newValue;
+            found = TRUE;
+            printf("Record with key '%s' has been updated to %.2f.\n", key, newValue);
+            break;
+        }
+    }
+
+    if (!found)
+    {   
+        printf("Record with key '%s' not found.\n", key);
+        return -1;
+    }
+    return 0;
+}
+
 void handleDataTable(char command[], char dataTable[])
 {
     if (sscanf(command, "open %s", dataTable) == 1)
     {
-        printf("Command: OPEN\n");
-        // printf("DataTable: %s\n", dataTable);
-        openDataTable(dataTable);
+        printf("==============OPEN==============\n\n");
+        dataTableOpen = openDataTable(dataTable) == 0;
     }
     else if (sscanf(command, "save %s", dataTable) == 1)
     {
-        printf("Command: SAVE\n");
+        printf("==============SAVE==============\n\n");
         // printf("DataTable: %s\n", dataTable);
         saveDataTable(dataTable);
     }
     else if (strcmp(command, "quit") == 0)
     {
-        printf("Command: QUIT\n");
+        printf("==============QUIT==============\n\n");
         startProgram = FALSE;
     }
-    else if (sscanf(command, "edit %s", dataTable) == 1)
+    else if (dataTableOpen)
     {
-        printf("Command: EDIT\n");
-        editDataTable(dataTable);
+        // Initialize variables
+        char key[50]; 
+        float newValue = 0.0;
+
+        if (strcmp(command, "show all") == 0)
+        {
+            printf("============SHOW ALL============\n\n");
+            // Implement the SHOW ALL function here
+        }
+        else if (sscanf(command, "insert %s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
+        {
+            printf("=============INSERT=============\n\n");
+            // Implement the INSERT function here
+            pairCount++;
+        }
+        else if (sscanf(command, "query %s", dataTable) == 1)
+        {
+            printf("=============QUERY=============\n\n");
+            // Implement the QUERY function here
+        }
+        else if (sscanf(command, "update %s %f", key, &newValue) == 2)
+        {
+            printf("=============UPDATE=============\n\n");
+            updateDataTable(key,newValue);
+        }
+        else if (sscanf(command, "delete %s", dataTable) == 1)
+        {
+            printf("=============DELETE=============\n\n");
+            // Implement the DELETE function here
+        }
+        else
+        {
+            printf("=============ERROR=============\n\n");
+            printf("Unknown command. Please try again.\n");
+        }
     }
     else
     {
-        printf("Unknown command. Please try again.\n");
+        printf("No data table is open. Use the 'open' command to open a data table.\n");
     }
 }
+
 int main()
 {
     char command[100], dataTable[50];
-    
     while (startProgram)
     {
-        printf("Enter a command: ");
+        if (dataTableOpen)
+        {
+            printf("Enter a command (SHOW ALL, INSERT, QUERY, UPDATE, DELETE, SAVE, or QUIT): ");
+        }
+        else
+        {
+            printf("Enter a command (OPEN or QUIT): ");
+        }
+
         fgets(command, sizeof(command), stdin);
 
         // Remove newline because fgets includes \n
@@ -197,9 +219,8 @@ int main()
             command[i] = tolower(command[i]);
         }
 
-        printf("==============Start==============\n");
         handleDataTable(command, dataTable);
-        printf("===============End===============\n");
+        printf("===============End===============\n\n");
     }
 
     return 0;
