@@ -107,6 +107,18 @@ int openDataTable(char dataTable[])
     }
 }
 
+int showAllRecords() {
+    if (recordPairs == NULL) {
+        printf("There are no records to show.\n");
+        return;
+    }
+    for (int i = 0; i < pairCount; i++) {
+        printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
+    }
+    printf("==================================\n");
+    printf("There are in total %d records found\n", pairCount);
+}
+
 int updateDataTable(char key[], float newValue)
 {
     int found = FALSE;
@@ -157,7 +169,7 @@ void handleDataTable(char command[], char dataTable[])
         if (strcmp(command, "show all") == 0)
         {
             printf("============SHOW ALL============\n\n");
-            // Implement the SHOW ALL function here
+            showAllRecords();
         }
         else if (sscanf(command, "insert %s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
         {
