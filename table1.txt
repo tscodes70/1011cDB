@@ -1,4 +1,4 @@
-Key Value
-Mango 6.50
-Orange 12.00
-Apple 5.90
+Key	Value
+Mango	6.5
+Orange	3.3
+Apple	4.2

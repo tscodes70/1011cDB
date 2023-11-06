@@ -119,6 +119,39 @@ int showAllRecords() {
     printf("There are in total %d records found\n", pairCount);
 }
 
+int getIndexForInsert(char key[])
+{
+    for (int i = 0; i < pairCount; i++)
+    {
+        /* compare the key in the loop against the key user input */
+        /* if the key in the loop matches the user input key */
+        if (strcasecmp(recordPairs[i].key, key) == 0)
+        {
+            /*printf("The record with Key='%s' already exists in the database.\n", key);*/
+            /* if theres a match return 0 */
+            return 0;
+        }
+    }
+    /* if no match return -1 */
+    return -1;
+}
+
+int insertNewRecord(char key[], float newValue)
+{
+    int index = getIndexForInsert(key);
+
+    if (index == -1) // key not found
+    {
+        strcpy(recordPairs[pairCount].key, key);
+        recordPairs[pairCount].value = newValue;
+        printf("A new record of Key='%s', Value='%.2f' is successfully inserted\n", key, newValue);
+    }
+    else // Key found
+    { 
+        printf("The record with Key='%s' already exists in the database.\n", key);
+    }
+}
+
 int updateDataTable(char key[], float newValue)
 {
     int found = FALSE;
@@ -174,7 +207,7 @@ void handleDataTable(char command[], char dataTable[])
         else if (sscanf(command, "insert %s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
         {
             printf("=============INSERT=============\n\n");
-            // Implement the INSERT function here
+            insertNewRecord(recordPairs[pairCount].key,recordPairs[pairCount].value);
             pairCount++;
         }
         else if (sscanf(command, "query %s", dataTable) == 1)
