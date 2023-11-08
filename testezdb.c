@@ -175,6 +175,31 @@ int updateDataTable(char key[], float newValue)
     return 0;
 }
 
+int deleteRecord(char command[]) {
+    char key[10];
+    
+    if (sscanf(command, "delete %s", key)==1) {
+        int found=FALSE;
+        int i=0;
+
+        while (i<pairCount && !found) {
+            if (strcasecmp(recordPairs[i].key, key)==0) {
+                found=TRUE;
+                pairCount--;
+
+                recordPairs[i]=recordPairs[pairCount];
+
+                printf("The record of Key=%s is successfully deleted.\n", key);
+            }
+            i++;
+        }
+
+        if (!found) {
+            printf("There is no record with Key=%s found in the database.\n");
+        }
+    }
+}
+
 void handleDataTable(char command[], char dataTable[])
 {
     if (sscanf(command, "open %s", dataTable) == 1)
@@ -223,7 +248,7 @@ void handleDataTable(char command[], char dataTable[])
         else if (sscanf(command, "delete %s", dataTable) == 1)
         {
             printf("=============DELETE=============\n\n");
-            // Implement the DELETE function here
+            deleteRecord(command);
         }
         else
         {
