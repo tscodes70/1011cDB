@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> 
+#include <ctype.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -13,6 +15,7 @@ typedef struct
 int startProgram = TRUE;
 // Allocate Memory
 Record *recordPairs = NULL;
+int maxRecords = 100; // Set an initial maximum value
 int pairCount = 0;
 
 int dataTableOpen = FALSE;
@@ -52,11 +55,13 @@ int saveDataTable(char dataTable[])
         }
 
         fclose(file); // Close the file
-        printf("Data saved to %s.\n", dataTable);
         // Free dynamically allocated memory
         free(recordPairs);
         recordPairs = NULL;
+        dataTableOpen = FALSE;
         pairCount = 0;
+        printf("Data saved to %s.\n", dataTable);
+
         return 0;
     }
 }
@@ -74,6 +79,14 @@ int openDataTable(char dataTable[])
     }
     else
     {
+        // Initialize or allocate memory for recordPairs
+        recordPairs = malloc(maxRecords * sizeof(Record));
+
+        if (recordPairs == NULL) {
+            perror("Memory allocation failed.\n");
+            fclose(file);
+            return -1;
+        }
         // Skip the header lines
         if (fgets(header, sizeof(header), file) == NULL)
         {
@@ -82,14 +95,27 @@ int openDataTable(char dataTable[])
             return -1;
         }
         printf("Selected DataTable: %s\n", dataTable);
-        while (fgets(line, sizeof(line), file) != NULL)
-        {
-            // Resize the array to accommodate a new record
-            recordPairs = realloc(recordPairs, (pairCount + 1) * sizeof(Record));
+
+        while (fgets(line, sizeof(line), file) != NULL) {
+            // Check if there's enough space for a new record
+            if (pairCount >= maxRecords) {
+                maxRecords += 10; // You can adjust the increment as needed
+
+                // Resize the array to accommodate a new record
+                Record *temp = realloc(recordPairs, maxRecords * sizeof(Record));
+
+                if (temp == NULL) {
+                    perror("Memory allocation failed.\n");
+                    fclose(file);
+                    free(recordPairs);
+                    return -1;
+                }
+
+                recordPairs = temp;
+            }
 
             // Read and store the key-value pair
-            if (sscanf(line, "%49s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
-            {
+            if (sscanf(line, "%49s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2) {
                 pairCount++;
             }
         }
@@ -107,7 +133,18 @@ int openDataTable(char dataTable[])
     }
 }
 
-int updateDataTable(char key[], float newValue)
+int getIndexForInsert(const char key[]) {
+    for (int i = 0; i < pairCount; i++) {
+        if (strcasecmp(recordPairs[i].key, key) == 0) {
+            return 0; // Key found
+        }
+    }
+    return -1; // Key not found
+}
+
+
+//Main functions
+int updateRecord(char key[], float newValue)
 {
     int found = FALSE;
 
@@ -129,6 +166,66 @@ int updateDataTable(char key[], float newValue)
     }
     return 0;
 }
+
+void insertRecord(const char key[], float newValue) {
+    int index = getIndexForInsert(key);
+
+    if (index == -1) {
+        strcpy(recordPairs[pairCount].key, key);
+        recordPairs[pairCount].value = newValue;
+        printf("A new record of Key='%s', Value='%.2f' is successfully inserted\n", key, newValue);
+        pairCount++;
+        
+    } else {
+        printf("The record with Key='%s' already exists in the database.\n", key);
+    }
+}
+
+void showAllRecord() {
+    if (recordPairs == NULL) {
+        printf("There are no records to show.\n");
+    }else{
+        for (int i = 0; i < pairCount; i++) {
+            printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
+        }
+        printf("==================================\n");
+        printf("There are in total %d records found\n", pairCount);
+    }
+}
+
+void deleteRecord(char delKey[]) {
+    if (recordPairs == NULL) {
+        printf("Error: recordPairs is NULL. Make sure it is properly allocated.\n");
+        return;
+    }
+
+    int found = FALSE;
+    int i = 0;
+
+    while (i < pairCount && !found) {
+        if (strcasecmp(recordPairs[i].key, delKey) == 0) {
+            found = TRUE;
+
+            if (pairCount > 1) {
+                pairCount--;
+
+                // Move the last record to the position of the deleted record
+                recordPairs[i] = recordPairs[pairCount];
+            } else {
+                // If there's only one record, just decrement pairCount
+                pairCount = 0;
+            }
+
+            printf("The record of Key=%s is successfully deleted.\n", delKey);
+        }
+        i++;
+    }
+
+    if (!found) {
+        printf("There is no record with Key=%s found in the database.\n", delKey);
+    }
+}
+
 
 void handleDataTable(char command[], char dataTable[])
 {
@@ -153,19 +250,20 @@ void handleDataTable(char command[], char dataTable[])
         // Initialize variables
         char key[50]; 
         float newValue = 0.0;
+        float value;
 
         if (strcmp(command, "show all") == 0)
         {
             printf("============SHOW ALL============\n\n");
-            // Implement the SHOW ALL function here
+            showAllRecord();
         }
-        else if (sscanf(command, "insert %s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
+        else if (sscanf(command, "insert %s %f", key, &value) == 2)
         {
             printf("=============INSERT=============\n\n");
-            // Implement the INSERT function here
+            insertRecord(key,value);
             pairCount++;
         }
-        else if (sscanf(command, "query %s", dataTable) == 1)
+        else if (sscanf(command, "query %s", key) == 1)
         {
             printf("=============QUERY=============\n\n");
             // Implement the QUERY function here
@@ -173,12 +271,12 @@ void handleDataTable(char command[], char dataTable[])
         else if (sscanf(command, "update %s %f", key, &newValue) == 2)
         {
             printf("=============UPDATE=============\n\n");
-            updateDataTable(key,newValue);
+            updateRecord(key,newValue);
         }
-        else if (sscanf(command, "delete %s", dataTable) == 1)
+        else if (sscanf(command, "delete %s", key) == 1)
         {
             printf("=============DELETE=============\n\n");
-            // Implement the DELETE function here
+            deleteRecord(key);
         }
         else
         {
