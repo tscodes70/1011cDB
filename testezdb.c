@@ -158,7 +158,7 @@ int updateRecord(char key[], float newValue)
 
     for (int i = 0; i < pairCount; i++)
     {
-        if (strcasecmp(recordPairs[i].key, key) == 0)
+        if (strcasecmp(recordPairs[i].key, key) != 0)
         {
             recordPairs[i].value = newValue;
             found = TRUE;
@@ -177,18 +177,34 @@ int updateRecord(char key[], float newValue)
 
 int insertRecord(char key[], float newValue)
 {
-    int index = getIndexForInsert(key);
+    //int index = getIndexForInsert(key);
+    int match = FALSE;
 
-    if (index == -1) // key not found
+    for (int i = 0; i < pairCount; i++)
+    {
+        /* compare the key in the loop against the key user input */
+        /* if the key in the loop matches the user input key */
+        if (strcasecmp(recordPairs[i].key, key) == 0)
+        {
+            printf("The record with Key='%s' already exists in the database.\n", key);
+            match = TRUE;
+            break;
+        }
+
+    }
+    
+    if (!match)
     {
         strcpy(recordPairs[pairCount].key, key);
         recordPairs[pairCount].value = newValue;
+        pairCount++;
         printf("A new record of Key='%s', Value='%.2f' is successfully inserted\n", key, newValue);
+        match = FALSE;
+
+        return 0;
     }
-    else // Key found
-    { 
-        printf("The record with Key='%s' already exists in the database.\n", key);
-    }
+
+    return -1;
 }
 
 void showAllRecord() {
@@ -271,7 +287,6 @@ void handleDataTable(char command[], char dataTable[])
         {
             printf("=============INSERT=============\n\n");
             insertRecord(key,value);
-            pairCount++;
         }
         else if (sscanf(command, "query %s", key) == 1)
         {
