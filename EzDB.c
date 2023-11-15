@@ -6,25 +6,36 @@
 #define TRUE 1
 #define FALSE 0
 
+// Constants
+const float VERSION_NUMBER = 1.0;
+const char *GROUP_MEMBERS[] = {"Timothy See (2302189)", "Hariz Darwisy Bin Adan (2302221)", "Lan Zexi (2303456)", "Siti Faziera Binti Razale (2303416)", "Chua Yi Xuan (2302090)", "Khairunnisa Bte Yunos (2302147)"};
+const char *ODT_COMMANDS[] = {"SHOW ALL", "INSERT <key> <value>", "QUERY <key>", "UPDATE  <key> <newValue>", "DELETE <key>", "SAVE <filename>.txt", "QUIT"};
+const char *CDT_COMMANDS[] = {"OPEN <filename>.txt", "QUIT"};
+
+// Structs
 typedef struct
 {
     char key[50];
     float value;
 } Record;
 
-const float VERSION_NUMBER = 1.0;
-const char *GROUP_MEMBERS[] = {"Timothy See (2302189)", "Hariz Darwisy Bin Adan (2302221)", "Lan Zexi (2303456)", "Siti Faziera Binti Razale (2303416)", "Chua Yi Xuan (2302090)", "Khairunnisa Bte Yunos (2302147)"};
-const char *ODT_COMMANDS[] = {"SHOW ALL", "INSERT <key> <value>", "QUERY <key>", "UPDATE  <key> <newValue>", "DELETE <key>", "SAVE <filename>.txt", "QUIT"};
-const char *CDT_COMMANDS[] = {"OPEN <filename>.txt", "QUIT"};
-
-int startProgram = TRUE;
-// Allocate Memory
+// Initial initalization
 Record *recordPairs = NULL;
-int maxRecords = 100; // Set an initial maximum value
+int startProgram = TRUE;
+int maxRecords = 100;
 int pairCount = 0;
-
 int dataTableOpen = FALSE;
 
+/*
+ * Function:  saveDataTable 
+ * --------------------
+ * Writes datatable stored in memory into a .txt file, then resets variables.
+ *
+ *  dataTable: A .txt file to write datatable into.
+ *
+ *  returns: -1 on error (empty memory / failure to open file for writing )
+ *            0 on successful writing to specified .txt file
+ */
 int saveDataTable(char dataTable[])
 {
     // Check if datatable is open
@@ -71,6 +82,16 @@ int saveDataTable(char dataTable[])
     }
 }
 
+/*
+ * Function:  openDataTable 
+ * --------------------
+ * Reads data table from .txt file and loads into memory, preparing data for manipulation.
+ *
+ *  dataTable: A .txt file to read datatable from.
+ *
+ *  returns: -1 on error (memory allocation issues / reading file issues)
+ *            0 on successful loading of datatable into memory
+ */
 int openDataTable(char dataTable[])
 {
     char line[100], header[100];
@@ -125,61 +146,47 @@ int openDataTable(char dataTable[])
         }
 
         fclose(file);
-
-        // print loaded table
-        // printf("-----------%s-----------\n", dataTable);
-        // for (int i = 0; i < pairCount; i++)
-        // {
-        //     printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
-        // }
-        // printf("---------------------------------\n");
         return 0;
     }
 }
 
-int getIndexForInsert(char key[])
-{
-    for (int i = 0; i < pairCount; i++)
+/*
+ * Function:  showAllRecord 
+ * --------------------
+ * Prints all records of datatable currently stored in memory.
+ */
+void showAllRecord(){
+    if (recordPairs == NULL)
     {
-        /* compare the key in the loop against the key user input */
-        /* if the key in the loop matches the user input key */
-        if (strcasecmp(recordPairs[i].key, key) == 0)
-        {
-            /*printf("The record with Key='%s' already exists in the database.\n", key);*/
-            /* if theres a match return 0 */
-            return 0;
-        }
+        printf("There are no records to show.\n");
     }
-    /* if no match return -1 */
-    return -1;
+    else
+    {
+        printf("-------------------------------------------------------------------\n");
+        printf("| %-50s | %-10s |\n", "Key", "Value");
+        printf("|----------------------------------------------------|------------|\n");
+
+        for (int i = 0; i < pairCount; ++i)
+        {
+            printf("| %-50s | %-10.2f |\n", recordPairs[i].key, recordPairs[i].value);
+        }
+        printf("-------------------------------------------------------------------\n");
+        printf("\nThere are in total %d records found.\n\n", pairCount);
+    }
 }
 
-// Main functions
-int updateRecord(char key[], float newValue)
-{
-    int found = FALSE;
-
-    for (int i = 0; i < pairCount; i++)
-    {
-        if (strcasecmp(recordPairs[i].key, key) == 0)
-        {
-            recordPairs[i].value = newValue;
-            found = TRUE;
-            printf("Record with key '%s' has been updated to %.2f.\n", key, newValue);
-            break;
-        }
-    }
-
-    if (!found)
-    {
-        printf("Record with key '%s' not found.\n", key);
-        return -1;
-    }
-    return 0;
-}
-
-int insertRecord(char key[], float newValue)
-{
+/*
+ * Function:  insertRecord 
+ * --------------------
+ * Inserts new record of key,value into datatable.
+ *
+ *  key: Key to be inserted.
+ *  newValue: Value associated with new key.
+ *
+ *  returns: 0 on failed insertion, existing key found.
+ *          -1 on successful insertion, no existing key found.
+ */
+int insertRecord(char key[], float newValue){
     // int index = getIndexForInsert(key);
     int match = FALSE;
 
@@ -209,29 +216,82 @@ int insertRecord(char key[], float newValue)
     return -1;
 }
 
-void showAllRecord()
-{
+/*
+ * Function:  queryRecord 
+ * --------------------
+ * Query a record from the datatable.
+ *
+ *  key: Key to query.
+ */
+void queryRecord(char queryKey[]){
+    // check if table is empty
     if (recordPairs == NULL)
     {
-        printf("There are no records to show.\n");
+        printf("Error: Datatable not loaded in memory.\n\n");
+        return;
     }
-    else
-    {
-        printf("-------------------------------------------------------------------\n");
-        printf("| %-50s | %-10s |\n", "Key", "Value");
-        printf("|----------------------------------------------------|------------|\n");
 
-        for (int i = 0; i < pairCount; ++i)
+    int i = 0;
+    int found = FALSE;
+
+    while (i < pairCount && !found)
+    {
+        if (strcasecmp(recordPairs[i].key, queryKey) == 0)
         {
-            printf("| %-50s | %-10.2f |\n", recordPairs[i].key, recordPairs[i].value);
+            found = TRUE;
+
+            printf("Record of Key=%s found, Value=%.2f is found in the database.\n\n", recordPairs[i].key, recordPairs[i].value);
         }
-        printf("-------------------------------------------------------------------\n");
-        printf("\nThere are in total %d records found.\n\n", pairCount);
+        i++;
+    }
+
+    if (!found)
+    {
+        printf("No record with Key=%s found in the database.\n\n", queryKey);
     }
 }
 
-void deleteRecord(char delKey[])
-{
+/*
+ * Function:  updateRecord 
+ * --------------------
+ * Update value of key in the current datatable.
+ *
+ *  key: Key to update.
+ *  newValue: New value of key.
+ *
+ *  returns: 0 on key successfully updated.
+ *          -1 on key not found in datatable.
+ */
+int updateRecord(char key[], float newValue){
+    int found = FALSE;
+
+    for (int i = 0; i < pairCount; i++)
+    {
+        if (strcasecmp(recordPairs[i].key, key) == 0)
+        {
+            recordPairs[i].value = newValue;
+            found = TRUE;
+            printf("Record with key '%s' has been updated to %.2f.\n\n", key, newValue);
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        printf("Record with key '%s' not found.\n\n", key);
+        return -1;
+    }
+    return 0;
+}
+
+/*
+ * Function:  deleteRecord 
+ * --------------------
+ * Delete key,value pair in the current datatable.
+ *
+ *  key: Key to delete.
+ */
+void deleteRecord(char delKey[]){
     if (recordPairs == NULL)
     {
         printf("Error: Datatable not loaded in memory.\n\n");
@@ -271,37 +331,16 @@ void deleteRecord(char delKey[])
     }
 }
 
-void queryRecord(char queryKey[])
-{
-    // check if table is empty
-    if (recordPairs == NULL)
-    {
-        printf("Error: Datatable not loaded in memory.\n\n");
-        return;
-    }
-
-    int i = 0;
-    int found = FALSE;
-
-    while (i < pairCount && !found)
-    {
-        if (strcasecmp(recordPairs[i].key, queryKey) == 0)
-        {
-            found = TRUE;
-
-            printf("Record of Key=%s found, Value=%.2f is found in the database.\n\n", recordPairs[i].key, recordPairs[i].value);
-        }
-        i++;
-    }
-
-    if (!found)
-    {
-        printf("No record with Key=%s found in the database.\n\n", queryKey);
-    }
-}
-
-void handleDataTable(char command[], char dataTable[])
-{
+/*
+ * Function:  handleDataTable 
+ * --------------------
+ * Core Function that handles processing of EzDB commands, such as
+ * SHOW ALL, INSERT, QUERY, UPDATE, DELETE, SAVE, OPEN, QUIT
+ *
+ *  command: user inputted command.
+ *  dataTable: user inputted datatable.
+ */
+void handleDataTable(char command[], char dataTable[]){
     // Initialize variables
     char key[50];
     float newValue = 0.0;
@@ -358,8 +397,14 @@ void handleDataTable(char command[], char dataTable[])
     }
 }
 
-int main()
-{
+/*
+ * Function:  main 
+ * --------------------
+ * Main function that is the base of the application. Prints available commands at different stages
+ * of application. Reads and prepares user input for processing.
+ *
+ */
+int main(){
     char command[100], dataTable[50];
     int numNames = sizeof(GROUP_MEMBERS) / sizeof(GROUP_MEMBERS[0]);
     int sizeODT = sizeof(ODT_COMMANDS) / sizeof(ODT_COMMANDS[0]);
