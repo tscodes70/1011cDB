@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <ctype.h>
 
 #define TRUE 1
@@ -11,6 +11,11 @@ typedef struct
     char key[50];
     float value;
 } Record;
+
+const float VERSION_NUMBER = 1.0;
+const char *GROUP_MEMBERS[] = {"Timothy See (2302189)", "Hariz Darwisy Bin Adan (2302221)", "Lan Zexi (2303456)", "Siti Faziera Binti Razale (2303416)", "Chua Yi Xuan (2302090)", "Khairunnisa Bte Yunos (2302147)"};
+const char *ODT_COMMANDS[] = {"SHOW ALL", "INSERT <key> <value>", "QUERY <key>", "UPDATE  <key> <newValue>", "DELETE <key>", "SAVE <filename>.txt", "QUIT"};
+const char *CDT_COMMANDS[] = {"OPEN <filename>.txt", "QUIT"};
 
 int startProgram = TRUE;
 // Allocate Memory
@@ -25,14 +30,14 @@ int saveDataTable(char dataTable[])
     // Check if datatable is open
     if (!dataTableOpen)
     {
-        printf("No data table is open. Use the 'open' command to open a data table.\n");
+        printf("No data table is open. Use the 'open' command to open a data table.\n\n");
         return -1;
     }
 
-    //check for empty memory
+    // check for empty memory
     if (recordPairs == NULL)
     {
-        printf("Failed to write empty memory.\n");
+        printf("Failed to write empty memory.\n\n");
         return -1;
     }
 
@@ -60,7 +65,7 @@ int saveDataTable(char dataTable[])
         recordPairs = NULL;
         dataTableOpen = FALSE;
         pairCount = 0;
-        printf("Data saved to %s.\n", dataTable);
+        printf("Datatable saved to %s.\n\n", dataTable);
 
         return 0;
     }
@@ -68,7 +73,6 @@ int saveDataTable(char dataTable[])
 
 int openDataTable(char dataTable[])
 {
-    // Assuming a maximum of 100 key-value pairs & allocate memory for key-value pairs dynamically
     char line[100], header[100];
     FILE *file = fopen(dataTable, "r");
 
@@ -82,7 +86,8 @@ int openDataTable(char dataTable[])
         // Initialize or allocate memory for recordPairs
         recordPairs = malloc(maxRecords * sizeof(Record));
 
-        if (recordPairs == NULL) {
+        if (recordPairs == NULL)
+        {
             perror("Memory allocation failed.\n");
             fclose(file);
             return -1;
@@ -94,17 +99,17 @@ int openDataTable(char dataTable[])
             fclose(file);
             return -1;
         }
-        printf("Selected DataTable: %s\n", dataTable);
+        printf("Loaded datatable: %s\n\n", dataTable);
 
-        while (fgets(line, sizeof(line), file) != NULL) {
-            // Check if there's enough space for a new record
-            if (pairCount >= maxRecords) {
-                maxRecords += 10; // You can adjust the increment as needed
-
-                // Resize the array to accommodate a new record
+        while (fgets(line, sizeof(line), file) != NULL)
+        {
+            if (pairCount >= maxRecords)
+            {
+                maxRecords += 10;
                 Record *temp = realloc(recordPairs, maxRecords * sizeof(Record));
 
-                if (temp == NULL) {
+                if (temp == NULL)
+                {
                     perror("Memory allocation failed.\n");
                     fclose(file);
                     free(recordPairs);
@@ -113,22 +118,21 @@ int openDataTable(char dataTable[])
 
                 recordPairs = temp;
             }
-
-            // Read and store the key-value pair
-            if (sscanf(line, "%49s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2) {
+            if (sscanf(line, "%49s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
+            {
                 pairCount++;
             }
         }
 
         fclose(file);
 
-        // Print the read data
-        printf("-----------%s-----------\n", dataTable);
-        for (int i = 0; i < pairCount; i++)
-        {
-            printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
-        }
-        printf("---------------------------------\n");
+        // print loaded table
+        // printf("-----------%s-----------\n", dataTable);
+        // for (int i = 0; i < pairCount; i++)
+        // {
+        //     printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
+        // }
+        // printf("---------------------------------\n");
         return 0;
     }
 }
@@ -150,8 +154,7 @@ int getIndexForInsert(char key[])
     return -1;
 }
 
-
-//Main functions
+// Main functions
 int updateRecord(char key[], float newValue)
 {
     int found = FALSE;
@@ -168,7 +171,7 @@ int updateRecord(char key[], float newValue)
     }
 
     if (!found)
-    {   
+    {
         printf("Record with key '%s' not found.\n", key);
         return -1;
     }
@@ -177,7 +180,7 @@ int updateRecord(char key[], float newValue)
 
 int insertRecord(char key[], float newValue)
 {
-    //int index = getIndexForInsert(key);
+    // int index = getIndexForInsert(key);
     int match = FALSE;
 
     for (int i = 0; i < pairCount; i++)
@@ -186,19 +189,18 @@ int insertRecord(char key[], float newValue)
         /* if the key in the loop matches the user input key */
         if (strcasecmp(recordPairs[i].key, key) == 0)
         {
-            printf("The record with Key='%s' already exists in the database.\n", key);
+            printf("Key='%s' already exists in the database.\n\n", key);
             match = TRUE;
             break;
         }
-
     }
-    
+
     if (!match)
     {
         strcpy(recordPairs[pairCount].key, key);
         recordPairs[pairCount].value = newValue;
         pairCount++;
-        printf("A new record of Key='%s', Value='%.2f' is successfully inserted\n", key, newValue);
+        printf("Key='%s', Value='%.2f' is successfully inserted.\n\n", key, newValue);
         match = FALSE;
 
         return 0;
@@ -207,149 +209,196 @@ int insertRecord(char key[], float newValue)
     return -1;
 }
 
-void showAllRecord() {
-    if (recordPairs == NULL) {
+void showAllRecord()
+{
+    if (recordPairs == NULL)
+    {
         printf("There are no records to show.\n");
-    }else{
-        for (int i = 0; i < pairCount; i++) {
-            printf("Key: %s, Value: %.2f\n", recordPairs[i].key, recordPairs[i].value);
+    }
+    else
+    {
+        printf("-------------------------------------------------------------------\n");
+        printf("| %-50s | %-10s |\n", "Key", "Value");
+        printf("|----------------------------------------------------|------------|\n");
+
+        for (int i = 0; i < pairCount; ++i)
+        {
+            printf("| %-50s | %-10.2f |\n", recordPairs[i].key, recordPairs[i].value);
         }
-        printf("==================================\n");
-        printf("There are in total %d records found\n", pairCount);
+        printf("-------------------------------------------------------------------\n");
+        printf("\nThere are in total %d records found.\n\n", pairCount);
     }
 }
 
-void deleteRecord(char delKey[]) {
-    if (recordPairs == NULL) {
-        printf("Error: recordPairs is NULL. Make sure it is properly allocated.\n");
+void deleteRecord(char delKey[])
+{
+    if (recordPairs == NULL)
+    {
+        printf("Error: Datatable not loaded in memory.\n\n");
         return;
     }
 
     int found = FALSE;
     int i = 0;
 
-    while (i < pairCount && !found) {
-        if (strcasecmp(recordPairs[i].key, delKey) == 0) {
+    while (i < pairCount && !found)
+    {
+        if (strcasecmp(recordPairs[i].key, delKey) == 0)
+        {
             found = TRUE;
 
-            if (pairCount > 1) {
+            if (pairCount > 1)
+            {
                 pairCount--;
 
                 // Move the last record to the position of the deleted record
                 recordPairs[i] = recordPairs[pairCount];
-            } else {
+            }
+            else
+            {
                 // If there's only one record, just decrement pairCount
                 pairCount = 0;
             }
 
-            printf("The record of Key=%s is successfully deleted.\n", delKey);
+            printf("Record of Key=%s is successfully deleted.\n\n", delKey);
         }
         i++;
     }
 
-    if (!found) {
-        printf("There is no record with Key=%s found in the database.\n", delKey);
+    if (!found)
+    {
+        printf("No record with Key=%s found in the database.\n\n", delKey);
     }
 }
 
-void queryRecord(char queryKey[]) {
+void queryRecord(char queryKey[])
+{
     // check if table is empty
-    if(recordPairs == NULL){
-        printf("There are no records to show.\n");
+    if (recordPairs == NULL)
+    {
+        printf("Error: Datatable not loaded in memory.\n\n");
         return;
     }
 
     int i = 0;
     int found = FALSE;
 
-    while (i < pairCount && !found) {
-        if (strcasecmp(recordPairs[i].key, queryKey) == 0) {
+    while (i < pairCount && !found)
+    {
+        if (strcasecmp(recordPairs[i].key, queryKey) == 0)
+        {
             found = TRUE;
 
-            printf("A record of Key=%s found, Value=%.2f is found in the database.\n", recordPairs[i].key, recordPairs[i].value);
+            printf("Record of Key=%s found, Value=%.2f is found in the database.\n\n", recordPairs[i].key, recordPairs[i].value);
         }
         i++;
     }
 
-    if(!found) {
-        printf("There is no record with Key=%s found in the database.\n", queryKey);
+    if (!found)
+    {
+        printf("No record with Key=%s found in the database.\n\n", queryKey);
     }
 }
 
-
 void handleDataTable(char command[], char dataTable[])
 {
-    if (sscanf(command, "open %s", dataTable) == 1)
+    // Initialize variables
+    char key[50];
+    float newValue = 0.0;
+    float value;
+
+    if (strcmp(command, "quit") == 0)
     {
-        printf("==============OPEN==============\n\n");
-        dataTableOpen = openDataTable(dataTable) == 0;
-    }
-    else if (sscanf(command, "save %s", dataTable) == 1)
-    {
-        printf("==============SAVE==============\n\n");
-        saveDataTable(dataTable);
-    }
-    else if (strcmp(command, "quit") == 0)
-    {
-        printf("==============QUIT==============\n\n");
+        printf("Thank you for using INF1002 P2_3 EzDB!\n\n");
         startProgram = FALSE;
     }
+
     else if (dataTableOpen)
     {
-        // Initialize variables
-        char key[50]; 
-        float newValue = 0.0;
-        float value;
 
         if (strcmp(command, "show all") == 0)
         {
-            printf("============SHOW ALL============\n\n");
             showAllRecord();
         }
         else if (sscanf(command, "insert %s %f", key, &value) == 2)
         {
-            printf("=============INSERT=============\n\n");
-            insertRecord(key,value);
+            insertRecord(key, value);
         }
         else if (sscanf(command, "query %s", key) == 1)
         {
-            printf("=============QUERY=============\n\n");
             queryRecord(key);
         }
         else if (sscanf(command, "update %s %f", key, &newValue) == 2)
         {
-            printf("=============UPDATE=============\n\n");
-            updateRecord(key,newValue);
+            updateRecord(key, newValue);
         }
         else if (sscanf(command, "delete %s", key) == 1)
         {
-            printf("=============DELETE=============\n\n");
             deleteRecord(key);
+        }
+        else if (sscanf(command, "save %s", dataTable) == 1)
+        {
+            saveDataTable(dataTable);
         }
         else
         {
-            printf("=============ERROR=============\n\n");
-            printf("Unknown command. Please try again.\n");
+            printf("Unknown command. Please try again.\n\n");
+        }
+    }
+    else if (!dataTableOpen)
+    {
+        if (sscanf(command, "open %s", dataTable) == 1)
+        {
+            dataTableOpen = openDataTable(dataTable) == 0;
         }
     }
     else
     {
-        printf("No data table is open. Use the 'open' command to open a data table.\n");
+        printf("No data table is open. Use the 'open' command to open a data table.\n\n");
     }
 }
 
 int main()
 {
     char command[100], dataTable[50];
+    int numNames = sizeof(GROUP_MEMBERS) / sizeof(GROUP_MEMBERS[0]);
+    int sizeODT = sizeof(ODT_COMMANDS) / sizeof(ODT_COMMANDS[0]);
+    int sizeCDT = sizeof(CDT_COMMANDS) / sizeof(CDT_COMMANDS[0]);
+
+    printf("INF1002 Group P2_3 EzDB [Version %.1f]\n", VERSION_NUMBER);
+    printf("\n");
+    for (int i = 0; i < numNames; i++)
+    {
+        printf("Member %d: %s\n", i + 1, GROUP_MEMBERS[i]);
+    }
+    printf("\n");
     while (startProgram)
     {
+
         if (dataTableOpen)
         {
-            printf("Enter a command (SHOW ALL, INSERT, QUERY, UPDATE, DELETE, SAVE, or QUIT): ");
+            printf("***********************\n");
+            printf("| Available Commands: |\n");
+            printf("***********************\n");
+
+            for (int i = 0; i < sizeODT; i++)
+            {
+                printf("%d - %s\n", i + 1, ODT_COMMANDS[i]);
+            }
+            printf("\n\nEnter a command (SHOW ALL, INSERT, QUERY, UPDATE, DELETE, SAVE, or QUIT): ");
         }
         else
         {
-            printf("Enter a command (OPEN or QUIT): ");
+            printf("***********************\n");
+            printf("| Available Commands: |\n");
+            printf("***********************\n");
+
+            for (int i = 0; i < sizeCDT; i++)
+            {
+                printf("%d - %s\n", i + 1, CDT_COMMANDS[i]);
+            }
+
+            printf("\n\nEnter a command (OPEN or QUIT): ");
         }
 
         fgets(command, sizeof(command), stdin);
@@ -364,9 +413,8 @@ int main()
         {
             command[i] = tolower(command[i]);
         }
-
+        printf("\n");
         handleDataTable(command, dataTable);
-        printf("===============End===============\n\n");
     }
 
     return 0;

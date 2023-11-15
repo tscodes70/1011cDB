@@ -48,8 +48,6 @@ Filet-O-Fish_Meal 7.99
 Cheeseburger_Meal_with_Dasani_Drinking_Water 7.49
 Filet-O-Fish_Meal_with_Dasani_Drinking_Water 8.99
 McChicken_Meal_with_Dasani_Drinking_Water 6.49
-Grilled_Chicken_McWrap_Meal_with_Dasani_Drinking_Water 7.99
-Grilled_Chicken_Salad_Meal_with_Dasani_Drinking_Water 6.99
 Apple_Slices 1.49
 French_Fries_(Small) 1.79
 French_Fries_(Medium) 2.29
