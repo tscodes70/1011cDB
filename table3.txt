@@ -1,5 +1,5 @@
 Key Value
-Quarter_Pounder_with_Cheese 5.99
+Quarter_Pounder_with_Cheese 5.60
 Double_Quarter_Pounder_with_Cheese 7.99
 Cheeseburger 2.49
 Double_Cheeseburger 4.29
@@ -48,8 +48,6 @@ Filet-O-Fish_Meal 7.99
 Cheeseburger_Meal_with_Dasani_Drinking_Water 7.49
 Filet-O-Fish_Meal_with_Dasani_Drinking_Water 8.99
 McChicken_Meal_with_Dasani_Drinking_Water 6.49
-Grilled_Chicken_McWrap_Meal_with_Dasani_Drinking_Water 7.99
-Grilled_Chicken_Salad_Meal_with_Dasani_Drinking_Water 6.99
 Apple_Slices 1.49
 French_Fries_(Small) 1.79
 French_Fries_(Medium) 2.29
@@ -97,3 +95,4 @@ Mocha_Frappe_(Small) 2.79
 Mocha_Frappe_(Medium) 3.29
 Caramel_Frappe_(Small) 2.79
 Caramel_Frappe_(Medium) 3.29
+nugget 5.50

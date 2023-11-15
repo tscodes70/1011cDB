@@ -252,6 +252,30 @@ void deleteRecord(char delKey[]) {
     }
 }
 
+void queryRecord(char queryKey[]) {
+    // check if table is empty
+    if(recordPairs == NULL){
+        printf("There are no records to show.\n");
+        return;
+    }
+
+    int i = 0;
+    int found = FALSE;
+
+    while (i < pairCount && !found) {
+        if (strcasecmp(recordPairs[i].key, queryKey) == 0) {
+            found = TRUE;
+
+            printf("A record of Key=%s found, Value=%.2f is found in the database.\n", recordPairs[i].key, recordPairs[i].value);
+        }
+        i++;
+    }
+
+    if(!found) {
+        printf("There is no record with Key=%s found in the database.\n", queryKey);
+    }
+}
+
 
 void handleDataTable(char command[], char dataTable[])
 {
@@ -263,7 +287,6 @@ void handleDataTable(char command[], char dataTable[])
     else if (sscanf(command, "save %s", dataTable) == 1)
     {
         printf("==============SAVE==============\n\n");
-        // printf("DataTable: %s\n", dataTable);
         saveDataTable(dataTable);
     }
     else if (strcmp(command, "quit") == 0)
@@ -291,7 +314,7 @@ void handleDataTable(char command[], char dataTable[])
         else if (sscanf(command, "query %s", key) == 1)
         {
             printf("=============QUERY=============\n\n");
-            // Implement the QUERY function here
+            queryRecord(key);
         }
         else if (sscanf(command, "update %s %f", key, &newValue) == 2)
         {
