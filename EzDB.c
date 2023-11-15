@@ -161,7 +161,7 @@ int updateRecord(char key[], float newValue)
 
     for (int i = 0; i < pairCount; i++)
     {
-        if (strcasecmp(recordPairs[i].key, key) != 0)
+        if (strcasecmp(recordPairs[i].key, key) == 0)
         {
             recordPairs[i].value = newValue;
             found = TRUE;
