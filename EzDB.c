@@ -124,6 +124,7 @@ int openDataTable(char dataTable[])
 
         while (fgets(line, sizeof(line), file) != NULL)
         {
+            // reallocate the memory fpr recordPairs if it exceeds
             if (pairCount >= maxRecords)
             {
                 maxRecords += 10;
@@ -139,6 +140,7 @@ int openDataTable(char dataTable[])
 
                 recordPairs = temp;
             }
+            // stores each line of the .txt file into key and value
             if (sscanf(line, "%49s %f", recordPairs[pairCount].key, &recordPairs[pairCount].value) == 2)
             {
                 pairCount++;
