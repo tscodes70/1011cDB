@@ -38,6 +38,8 @@ int dataTableOpen = FALSE;
  */
 int saveDataTable(char dataTable[])
 {
+    FILE *file = fopen(dataTable, "w"); // Open the file for writing
+
     // Check if datatable is open
     if (!dataTableOpen)
     {
@@ -52,8 +54,7 @@ int saveDataTable(char dataTable[])
         return -1;
     }
 
-    FILE *file = fopen(dataTable, "w"); // Open the file for writing
-
+    // check if file is open
     if (file == NULL)
     {
         perror("Failed to open the file for writing");
