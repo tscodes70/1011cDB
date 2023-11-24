@@ -415,10 +415,25 @@ int main(){
 
     printf("INF1002 Group P2_3 EzDB [Version %.1f]\n", VERSION_NUMBER);
     printf("\n");
-    for (int i = 0; i < numNames; i++)
+    printf("Declaration\n\n");
+    printf("SIT policy on copying does not allow the students to copy source code as well as assessment solutions\n");
+    printf("from another person or other places. It is the students responsibility to guarantee that their assessment\n");
+    printf("solutions are their own work. Meanwhile, the students must also ensure that their work is not accessible\n");
+    printf("by others. Where such plagiarism is detected, both of the assessments involved will receive ZERO mark.\n");
+    printf("We hereby declare that:\n");
+    printf("We fully understand and agree to the abovementioned plagiarism policy.\n");
+    printf("We did not copy any code from others or from other places.\n");
+    printf("We did not share our codes with others or upload to any other places for public access.\n");
+    printf("We agree that our project will receive Zero mark if there is any plagiarism detected.\n\nquiquiquit");
+    printf("Declared by: Group Name: P2-3\n");
+    printf("Team members:\n");
+        for (int i = 0; i < numNames; i++)
     {
-        printf("Member %d: %s\n", i + 1, GROUP_MEMBERS[i]);
+        printf("%d. %s\n", i + 1, GROUP_MEMBERS[i]);
     }
+    printf("Date: 22/11/2023\n");
+
+
     printf("\n");
     while (startProgram)
     {
